@@ -1,0 +1,39 @@
+import rtde_control
+from rtde_receive import *
+import time
+
+# 配置机器人的IP地址和端口
+ROBOT_IP = "192.168.x.x"  # 替换为你的机器人IP地址
+RTDE_CONTROL_PORT = 30002
+
+def main():
+    # 连接到机器人的RTDE Control Interface
+    with rtde_control.RTDEControlInterface(ROBOT_IP, RTDE_CONTROL_PORT) as rtde:
+        # 获取当前工具中心点（TCP）的位置
+        tcp_position = rtde.getActualTCPPose()
+        print(f"Current TCP position: {tcp_position}")
+
+        # 定义一个目标位置（以米为单位）
+        target_position = [0.1, 0.0, 0.1, 0, 0, 0]  # [x, y, z, rx, ry, rz]
+
+        # 设置移动参数
+        speed_j = 0.5  # 关节速度（弧度/秒）
+        speed_l = 0.1  # 线性速度（米/秒）
+        max_time = 5.0  # 最大执行时间（秒）
+
+        # 发送线性移动命令
+        rtde.moveL(target_position, speed_l, max_time)
+
+        # 等待移动完成
+        time.sleep(2)  # 等待一段时间以确保移动完成，这里只是一个简单的延时
+
+        # 再次获取TCP位置
+        tcp_position_after_move = rtde.getActualTCPPose()
+        print(f"TCP position after move: {tcp_position_after_move}")
+
+        # 还可以获取其他状态信息，例如关节角度、速度等
+        joint_angles = rtde.getActualJointPositions()
+        print(f"Joint angles: {joint_angles}")
+
+if __name__ == "__main__":
+    main()
